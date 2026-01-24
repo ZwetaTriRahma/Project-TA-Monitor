@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ta_monitor/screens/profile/edit_profile_page.dart';
+import 'package:ta_monitor/screens/profile/change_password_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -118,8 +119,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   context,
                   icon: Icons.lock_reset_outlined,
                   title: 'Change Password',
-                  onTap: () { /* TODO: Implement Change Password */ },
-                  enabled: false,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => const ChangePasswordPage()),
+                    );
+                  },
+                  enabled: true,
                 ),
                 const SizedBox(height: 24),
                  ElevatedButton.icon(

@@ -1,10 +1,7 @@
-// ===== KODE DIPERBAIKI UNTUK MENGATASI LAYAR PUTIH & LOGIN LOOP =====
-// Semua sisa kode notifikasi yang menyebabkan crash telah dihapus.
-
+// Authentication Wrapper to manage user sessions
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-// import 'package:ta_monitor/api/firebase_api.dart'; // DIHAPUS
 import 'package:ta_monitor/screens/auth/login_page.dart';
 import 'package:ta_monitor/screens/dashboard/lecturer_dashboard.dart';
 import 'package:ta_monitor/screens/dashboard/student_dashboard.dart';
@@ -25,7 +22,6 @@ class AuthWrapper extends StatelessWidget {
             return const LoginPage();
           }
           // Jika ada user, cek perannya di database
-          // FirebaseApi().saveTokenToDatabase(user.uid); // DIHAPUS
           return RoleBasedRedirect(userId: user.uid);
         }
         // Selama loading, tampilkan spinner
@@ -55,9 +51,9 @@ class RoleBasedRedirect extends StatelessWidget {
             final role = data['role'];
 
             if (role == 'Mahasiswa') {
-              return const StudentDashboard();
+              return StudentDashboard();
             } else if (role == 'Dosen') {
-              return const LecturerDashboard();
+              return LecturerDashboard();
             }
           }
           // JIKA DATA USER TIDAK DITEMUKAN ATAU TIDAK PUNYA PERAN

@@ -11,16 +11,13 @@ class LecturerStudentFilesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: Text(studentName),
-        backgroundColor: Colors.blue.shade700,
-        foregroundColor: Colors.white,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
-            .collection('files')
-            .where('uploaderId', isEqualTo: studentId)
+            .collection('uploads')
+            .where('userId', isEqualTo: studentId)
             .orderBy('uploadedAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
@@ -29,33 +26,76 @@ class LecturerStudentFilesPage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('This student has not uploaded any files yet.'));
+            return const Center(
+              child: Text(
+                'This student has not uploaded any files yet.',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              )
+            );
           }
 
           final files = snapshot.data!.docs;
           return ListView.builder(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(8.0),
             itemCount: files.length,
             itemBuilder: (context, index) {
               final fileDoc = files[index];
               final fileData = fileDoc.data() as Map<String, dynamic>;
-              final fileName = fileData['fileName'] as String? ?? 'No name';
-
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12.0),
-                child: ListTile(
-                  leading: const Icon(Icons.description),
-                  title: Text(fileName),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => FileDetailsPage(fileId: fileDoc.id)),
-                  ),
-                ),
-              );
+              return _buildFileCard(context, fileDoc.id, fileData);
             },
           );
         },
       ),
     );
+  }
+
+  Widget _buildFileCard(BuildContext context, String fileId, Map<String, dynamic> fileData) {
+    final status = fileData['status'] ?? 'Pending';
+
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+      child: ListTile(
+        leading: Icon(_getIconForFileName(fileData['fileName'])),
+        title: Text(fileData['title'] ?? 'No Title', style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(fileData['fileName'] ?? ''),
+            const SizedBox(height: 4),
+            Chip(
+              label: Text(status),
+              backgroundColor: _getColorForStatus(status),
+              labelStyle: const TextStyle(color: Colors.white),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            ),
+          ],
+        ),
+        isThreeLine: true,
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => FileDetailsPage(fileId: fileId)),
+        ),
+      ),
+    );
+  }
+
+  IconData _getIconForFileName(String? fileName) {
+    if (fileName == null) return Icons.article;
+    if (fileName.endsWith('.pdf')) return Icons.picture_as_pdf;
+    if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) return Icons.description;
+    return Icons.article;
+  }
+
+  Color _getColorForStatus(String status) {
+    switch (status) {
+      case 'Approved':
+        return Colors.green;
+      case 'Revision':
+        return Colors.orange;
+      case 'Rejected':
+        return Colors.red;
+      default: // Pending, In Review
+        return Colors.blueGrey;
+    }
   }
 }

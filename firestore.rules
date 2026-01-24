@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read/write access to users collection for authenticated users
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Allow lecturers to read users data (temporary for testing)
+    match /users/{userId} {
+      allow read: if request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Dosen';
+    }
+
+    // Allow admins to read/write all users
+    match /users/{userId} {
+      allow read, write: if request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin';
+    }
+
+    // Allow read/write access to uploads for authenticated users
+    match /uploads/{uploadId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Allow read/write access to files for authenticated users
+    match /files/{fileId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Allow read/write access to notifications for the recipient
+    match /notifications/{notificationId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.recipientId;
+    }
+
+    // Allow read/write access to chat rooms for participants
+    match /chat_rooms/{roomId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid in resource.data.users;
+    }
+
+    // Allow read/write access to messages in chat rooms for participants
+    match /chat_rooms/{roomId}/messages/{messageId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid in get(/databases/$(database)/documents/chat_rooms/$(roomId)).data.users;
+    }
+  }
+}

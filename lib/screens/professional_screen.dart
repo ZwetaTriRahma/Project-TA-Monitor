@@ -1,157 +1,251 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class ProfessionalScreen extends StatelessWidget {
+// Model for a task
+class Task {
+  final String id;
+  final String title;
+  final String description;
+  final bool isDone;
+
+  Task({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.isDone,
+  });
+
+  factory Task.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    return Task(
+      id: doc.id,
+      title: data['title'] ?? '',
+      description: data['description'] ?? '',
+      isDone: data['isDone'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'title': title,
+      'description': description,
+      'isDone': isDone,
+    };
+  }
+}
+
+
+class ProfessionalScreen extends StatefulWidget {
   const ProfessionalScreen({super.key});
+
+  @override
+  State<ProfessionalScreen> createState() => _ProfessionalScreenState();
+}
+
+class _ProfessionalScreenState extends State<ProfessionalScreen> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final User _currentUser = FirebaseAuth.instance.currentUser!;
+
+  // Function to show a dialog for adding/editing a task
+  void _showTaskDialog({Task? task}) {
+    final _titleController = TextEditingController(text: task?.title);
+    final _descriptionController = TextEditingController(text: task?.description);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(task == null ? 'Add New Task' : 'Edit Task'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final title = _titleController.text.trim();
+                final description = _descriptionController.text.trim();
+
+                if (title.isNotEmpty) {
+                  if (task == null) {
+                    // Add new task
+                    _firestore
+                        .collection('users')
+                        .doc(_currentUser.uid)
+                        .collection('tasks')
+                        .add({
+                      'title': title,
+                      'description': description,
+                      'isDone': false,
+                      'createdAt': Timestamp.now(),
+                    });
+                  } else {
+                    // Update existing task
+                    _firestore
+                        .collection('users')
+                        .doc(_currentUser.uid)
+                        .collection('tasks')
+                        .doc(task.id)
+                        .update({
+                      'title': title,
+                      'description': description,
+                    });
+                  }
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Function to toggle the 'isDone' status of a task
+  void _toggleTaskStatus(Task task) {
+    _firestore
+        .collection('users')
+        .doc(_currentUser.uid)
+        .collection('tasks')
+        .doc(task.id)
+        .update({'isDone': !task.isDone});
+  }
+
+  // Function to delete a task
+  void _deleteTask(Task task) {
+     _firestore
+        .collection('users')
+        .doc(_currentUser.uid)
+        .collection('tasks')
+        .doc(task.id)
+        .delete();
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const CircleAvatar(
-              backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=a042581f4e29026704d'),
-            ),
-            onPressed: () {},
-          ),
-        ],
+        title: const Text('Task Management'),
+        backgroundColor: Colors.blue.shade700,
+        foregroundColor: Colors.white,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          _buildWelcomeCard(),
-          const SizedBox(height: 16),
-          _buildQuickActions(),
-          const SizedBox(height: 16),
-          _buildRecentActivity(),
-        ],
-      ),
-    );
-  }
+      body: StreamBuilder<QuerySnapshot>(
+        stream: _firestore
+            .collection('users')
+            .doc(_currentUser.uid)
+            .collection('tasks')
+            .orderBy('createdAt', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.library_add_check_outlined, size: 80, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text('No tasks yet.', style: TextStyle(fontSize: 18, color: Colors.grey)),
+                  Text('Press the + button to add a new task.', style: TextStyle(color: Colors.grey)),
+                ],
+              ),
+            );
+          }
 
-  Widget _buildWelcomeCard() {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            const CircleAvatar(
-              radius: 30,
-              backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=a042581f4e29026704d'),
-            ),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  'Welcome, User!',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+          final tasks = snapshot.data!.docs.map((doc) => Task.fromFirestore(doc)).toList();
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(12.0),
+            itemCount: tasks.length,
+            itemBuilder: (context, index) {
+              final task = tasks[index];
+              return Card(
+                elevation: 2,
+                margin: const EdgeInsets.only(bottom: 12.0),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  leading: Checkbox(
+                    value: task.isDone,
+                    onChanged: (bool? value) {
+                      _toggleTaskStatus(task);
+                    },
                   ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Here is a summary of your tasks.',
-                  style: TextStyle(
-                    color: Colors.grey,
+                  title: Text(
+                    task.title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      decoration: task.isDone ? TextDecoration.lineThrough : null,
+                      color: task.isDone ? Colors.grey : Colors.black87,
+                    ),
                   ),
+                  subtitle: task.description.isNotEmpty 
+                    ? Text(
+                        task.description,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          decoration: task.isDone ? TextDecoration.lineThrough : null,
+                        ),
+                      )
+                    : null,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined, color: Colors.blue),
+                        onPressed: () => _showTaskDialog(task: task),
+                        tooltip: 'Edit Task',
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        onPressed: () => _deleteTask(task),
+                        tooltip: 'Delete Task',
+                      ),
+                    ],
+                  ),
+                  onTap: () => _toggleTaskStatus(task),
                 ),
-              ],
-            ),
-          ],
-        ),
+              );
+            },
+          );
+        },
       ),
-    );
-  }
-
-  Widget _buildQuickActions() {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 16,
-      crossAxisSpacing: 16,
-      children: [
-        _buildActionCard(Icons.add, 'Add Task'),
-        _buildActionCard(Icons.list, 'View Tasks'),
-        _buildActionCard(Icons.person_add, 'Add Student'),
-        _buildActionCard(Icons.bar_chart, 'View Progress'),
-      ],
-    );
-  }
-
-  Widget _buildActionCard(IconData icon, String label) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showTaskDialog(),
+        tooltip: 'Add Task',
+        child: const Icon(Icons.add),
+        backgroundColor: Colors.blue.shade700,
       ),
-      child: InkWell(
-        onTap: () {},
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 40,
-              color: Colors.blue,
-            ),
-            const SizedBox(height: 8),
-            Text(label),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRecentActivity() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Recent Activity',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Column(
-            children: const [
-              ListTile(
-                leading: Icon(Icons.check_circle, color: Colors.green),
-                title: Text('Task "Implementasi UI" completed'),
-                subtitle: Text('2 hours ago'),
-              ),
-              ListTile(
-                leading: Icon(Icons.add_comment, color: Colors.orange),
-                title: Text('New comment on "Perancangan Database"'),
-                subtitle: Text('5 hours ago'),
-              ),
-              ListTile(
-                leading: Icon(Icons.person, color: Colors.blue),
-                title: Text('New student "Budi" added'),
-                subtitle: Text('1 day ago'),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

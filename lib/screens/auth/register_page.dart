@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-// --- Widget-widget yang sudah dioptimalkan sebelumnya ---
 class _PasswordTextField extends StatefulWidget {
   const _PasswordTextField({
     required this.controller,
@@ -39,7 +38,6 @@ class _PasswordTextFieldState extends State<_PasswordTextField> {
     );
   }
 }
-// --- End of Optimized Widgets ---
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -50,19 +48,24 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
-  // Controllers
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
-  // State
+  final _idNumberController = TextEditingController();
+
   bool _isLoading = false;
   String? _selectedRole;
-  final _roles = ['Mahasiswa', 'Dosen'];
-
-  // State untuk Dosen Pembimbing
+  String? _selectedFaculty;
+  String? _selectedMajor;
   String? _selectedLecturerId;
+
+  final Map<String, List<String>> _majorsByFaculty = {
+    'Fakultas Teknik': ['Teknik Informatika', 'Teknik Elektro', 'Teknik Mesin'],
+    'Fakultas Ekonomi': ['Akuntansi', 'Manajemen'],
+    'Fakultas Ilmu Sosial dan Ilmu Politik': ['Ilmu Komunikasi', 'Administrasi Publik'],
+  };
+  List<String> _majors = [];
   List<Map<String, String>> _lecturers = [];
   bool _isFetchingLecturers = false;
 
@@ -72,22 +75,55 @@ class _RegisterPageState extends State<RegisterPage> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _idNumberController.dispose();
     super.dispose();
   }
 
-  Future<void> _fetchLecturers() async {
+  void _onRoleChanged(String? newValue) {
     setState(() {
-      _isFetchingLecturers = true;
+        _selectedRole = newValue;
+        _selectedFaculty = null;
+        _selectedMajor = null;
+        _selectedLecturerId = null;
+    });
+  }
+
+  void _onFacultyChanged(String? newValue) {
+    if (newValue == null) return;
+    setState(() {
+      _selectedFaculty = newValue;
+      _majors = _majorsByFaculty[newValue] ?? [];
+      _selectedMajor = null;
       _lecturers = [];
       _selectedLecturerId = null;
     });
+  }
+
+  void _onMajorChanged(String? newValue) {
+    if (newValue == null) return;
+    setState(() {
+      _selectedMajor = newValue;
+      _lecturers = [];
+      _selectedLecturerId = null;
+    });
+    if (_selectedRole == 'Mahasiswa') {
+      _fetchLecturers(newValue);
+    }
+  }
+
+  Future<void> _fetchLecturers(String major) async {
+    setState(() => _isFetchingLecturers = true);
     try {
-      final querySnapshot = await FirebaseFirestore.instance.collection('users').where('role', isEqualTo: 'Dosen').get();
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('role', isEqualTo: 'Dosen')
+          .where('major', isEqualTo: major)
+          .get();
       final lecturers = querySnapshot.docs.map((doc) => {
         'id': doc.id,
         'name': doc.data()['fullName'] as String? ?? 'Unnamed Lecturer'
       }).toList();
-      setState(() => _lecturers = lecturers);
+      if(mounted) setState(() => _lecturers = lecturers);
     } catch (e) {
       if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to fetch lecturers: $e")));
     } finally {
@@ -95,21 +131,8 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  void _onRoleChanged(String? newValue) {
-    setState(() => _selectedRole = newValue);
-    if (newValue == 'Mahasiswa') {
-      _fetchLecturers();
-    } else {
-      setState(() {
-        _lecturers = [];
-        _selectedLecturerId = null;
-      });
-    }
-  }
-
   Future<void> _register() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
       return;
@@ -127,13 +150,21 @@ class _RegisterPageState extends State<RegisterPage> {
         'fullName': _fullNameController.text.trim(),
         'email': _emailController.text.trim(),
         'role': _selectedRole,
+        'createdAt': FieldValue.serverTimestamp(),
+        'isVerified': false, // Default verification status
+        'isDisabled': false, // Default disabled status
+        if (_selectedRole == 'Mahasiswa' || _selectedRole == 'Dosen') ...{
+           'faculty': _selectedFaculty,
+           'major': _selectedMajor,
+           'nim_or_nidn': _idNumberController.text.trim(),
+        },
         if (_selectedRole == 'Mahasiswa' && _selectedLecturerId != null) 'lecturerId': _selectedLecturerId,
       };
 
       await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set(userData);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registration successful! Please log in.')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registration successful! Your account is pending verification by an admin.')));
         Navigator.of(context).pop();
       }
     } on FirebaseAuthException catch (e) {
@@ -147,11 +178,11 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF1976D2), Color(0xFF0D47A1)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: const AssetImage("assets/images/campus_background.png"),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(Color.fromRGBO(0, 0, 0, 0.6), BlendMode.darken),
           ),
         ),
         child: Center(
@@ -162,7 +193,7 @@ class _RegisterPageState extends State<RegisterPage> {
               children: [
                 Text('Create Account', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.white)),
                 const SizedBox(height: 8),
-                Text('Get started by filling out the form below', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white70)),
+                Text('Join the community', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white70)),
                 const SizedBox(height: 40),
                 Card(
                   elevation: 8,
@@ -174,30 +205,42 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          TextFormField(controller: _fullNameController, decoration: const InputDecoration(labelText: 'Full Name', prefixIcon: Icon(Icons.person_outline), border: OutlineInputBorder()), validator: (v) => v!.isEmpty ? 'Please enter your full name' : null),
+                          TextFormField(controller: _fullNameController, decoration: const InputDecoration(labelText: 'Full Name', border: OutlineInputBorder()), validator: (v) => v!.isEmpty ? 'Enter your full name' : null),
                           const SizedBox(height: 16),
-                          TextFormField(controller: _emailController, keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email_outlined), border: OutlineInputBorder()), validator: (v) => v!.isEmpty ? 'Please enter an email' : null),
+                          TextFormField(controller: _emailController, keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()), validator: (v) => v!.isEmpty ? 'Enter an email' : null),
                           const SizedBox(height: 16),
-                          _PasswordTextField(controller: _passwordController, labelText: 'Password', validator: (v) => v!.length < 6 ? 'Password must be at least 6 characters' : null),
+                          _PasswordTextField(controller: _passwordController, labelText: 'Password', validator: (v) => v!.length < 6 ? 'Min. 6 characters' : null),
                           const SizedBox(height: 16),
-                          _PasswordTextField(controller: _confirmPasswordController, labelText: 'Confirm Password', validator: (v) => v!.isEmpty ? 'Please confirm your password' : null),
+                          _PasswordTextField(controller: _confirmPasswordController, labelText: 'Confirm Password', validator: (v) => v!.isEmpty ? 'Confirm your password' : null),
                           const SizedBox(height: 16),
-                          DropdownButtonFormField<String>(value: _selectedRole, hint: const Text('Select Role'), items: _roles.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(), onChanged: _onRoleChanged, decoration: const InputDecoration(border: OutlineInputBorder(), prefixIcon: Icon(Icons.work_outline)), validator: (v) => v == null ? 'Please select a role' : null),
-                          if (_selectedRole == 'Mahasiswa') ...[
+                          // [MODIFIED] Removed 'Admin' from the list of roles
+                          DropdownButtonFormField<String>(initialValue: _selectedRole, hint: const Text('Select Role'), items: ['Mahasiswa', 'Dosen'].map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(), onChanged: _onRoleChanged, decoration: const InputDecoration(border: OutlineInputBorder()), validator: (v) => v == null ? 'Select a role' : null),
+                          if (_selectedRole == 'Mahasiswa' || _selectedRole == 'Dosen') ...[
                             const SizedBox(height: 16),
-                             _isFetchingLecturers
+                            DropdownButtonFormField<String>(initialValue: _selectedFaculty, hint: const Text('Select Faculty'), items: _majorsByFaculty.keys.map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(), onChanged: _onFacultyChanged, decoration: const InputDecoration(border: OutlineInputBorder()), validator: (v) => v == null ? 'Select a faculty' : null),
+                            if (_selectedFaculty != null) ...[
+                              const SizedBox(height: 16),
+                              DropdownButtonFormField<String>(initialValue: _selectedMajor, hint: const Text('Select Major'), items: _majors.map((m) => DropdownMenuItem(value: m, child: Text(m))).toList(), onChanged: _onMajorChanged, decoration: const InputDecoration(border: OutlineInputBorder()), validator: (v) => v == null ? 'Select a major' : null),
+                            ],
+                             const SizedBox(height: 16),
+                            TextFormField(controller: _idNumberController, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: _selectedRole == 'Mahasiswa' ? 'NIM' : 'NIDN', border: const OutlineInputBorder()), validator: (v) => v!.isEmpty ? 'Enter your ID Number' : null),
+                          ],
+                          if (_selectedRole == 'Mahasiswa' && _selectedMajor != null) ...[
+                            const SizedBox(height: 16),
+                            _isFetchingLecturers
                               ? const Center(child: Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator()))
                               : DropdownButtonFormField<String>(
-                                  value: _selectedLecturerId,
-                                  hint: const Text('Select Lecturer'),
+                                  initialValue: _selectedLecturerId,
+                                  hint: const Text('Select Supervising Lecturer'),
                                   items: _lecturers.map((lec) => DropdownMenuItem(value: lec['id'], child: Text(lec['name']!))).toList(),
                                   onChanged: (value) => setState(() => _selectedLecturerId = value),
-                                  decoration: const InputDecoration(border: OutlineInputBorder(), prefixIcon: Icon(Icons.school_outlined)),
+                                  decoration: const InputDecoration(border: OutlineInputBorder()),
                                   validator: (v) => v == null ? 'Please select a lecturer' : null,
+                                  isExpanded: true,
                                 ),
                           ],
                           const SizedBox(height: 32),
-                          _isLoading ? const Center(child: CircularProgressIndicator()) : ElevatedButton(onPressed: _register, style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), backgroundColor: const Color(0xFF1565C0), foregroundColor: Colors.white), child: const Text('REGISTER')),
+                          _isLoading ? const Center(child: CircularProgressIndicator()) : ElevatedButton(onPressed: _register, style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)), child: const Text('REGISTER')),
                         ],
                       ),
                     ),
