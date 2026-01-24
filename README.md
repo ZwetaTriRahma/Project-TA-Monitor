@@ -4,29 +4,29 @@
 [![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
 [![Material 3](https://img.shields.io/badge/Material--3-6750A4?style=for-the-badge&logo=materialdesign&logoColor=white)](https://m3.material.io)
 
-**TA-Monitor** is a professional web-based platform designed to streamline and modernize the thesis (Tugas Akhir) supervision process. It bridges the gap between students and lecturers with a focus on accountability, historical tracking, and real-time communication.
+**TA-Monitor** adalah platform profesional berbasis web yang dirancang untuk menyederhanakan dan memodernisasi proses bimbingan Tugas Akhir (TA). Platform ini menghubungkan mahasiswa dan dosen dengan fokus pada akuntabilitas, pelacakan riwayat, dan komunikasi real-time.
 
 ---
 
-## ✨ Key Features
+## ✨ Fitur Utama
 
-### 👨‍🎓 For Students
-- **Interactive Dashboard**: Track your overall thesis progress with a visual ring indicator.
-- **Submission Versioning**: Preserve your submission history. Revisions are saved as new records, creating a clear audit trail.
-- **Progress Tracking**: Real-time status updates (Pending, Revision, Approved).
-- **Discussion Thread**: Discuss feedback directly on specific submissions with your lecturer.
+### 👨‍🎓 Untuk Mahasiswa
+- **Dashboard Interaktif**: Pantau progres TA Anda dengan indikator visual *progress ring*.
+- **Submission Versioning**: Riwayat pengajuan tetap terjaga. Revisi disimpan sebagai data baru, menciptakan jejak audit yang jelas.
+- **Pelacakan Progres**: Pembaruan status secara real-time (Pending, Revisi, Disetujui).
+- **Thread Diskusi**: Diskusikan umpan balik langsung pada file pengajuan bimbingan dengan dosen Anda.
 
-### 👨‍🏫 For Lecturers
-- **Faculty Overview**: High-level summary of all assigned students and their current progress.
-- **Detailed File Review**: Give structured feedback with the option to attach supporting images/screenshots.
-- **Real-time Communication**: Instant chat and thread-based discussions for effective guidance.
-- **Task Management**: Keep track of pending reviews across your student list.
+### 👨‍🏫 Untuk Dosen
+- **Ringkasan Fakultas**: Gambaran umum tingkat tinggi dari semua mahasiswa bimbingan dan progres mereka saat ini.
+- **Review File Mendetail**: Memberikan feedback terstruktur dengan opsi untuk melampirkan gambar/tangkapan layar pendukung.
+- **Komunikasi Real-time**: Chat instan dan diskusi berbasis thread untuk bimbingan yang lebih efektif.
+- **Manajemen Tugas**: Memantau ulasan yang tertunda di seluruh daftar mahasiswa.
 
-### 🛡️ Core Infrastructure
-- **Indigo Design System**: A premium, modern UI built with Material 3 and glassmorphism aesthetics.
-- **Secure Authentication**: Integrated Firebase Auth with Google Sign-In support.
-- **Cloud Storage**: Seamless document and image handling via Cloudinary and Firestore.
-- **Cross-Platform**: Optimized for a smooth web experience.
+### 🛡️ Infrastruktur Inti
+- **Sistem Desain Indigo**: UI modern premium yang dibangun dengan Material 3 dan estetika glassmorphism.
+- **Autentikasi Aman**: Terintegrasi dengan Firebase Auth dan dukungan Google Sign-In.
+- **Penyimpanan Cloud**: Penanganan dokumen dan gambar yang mulus melalui Cloudinary dan Firestore.
+- **Lintas Platform**: Dioptimalkan untuk pengalaman web yang lancar.
 
 ---
 
@@ -39,49 +39,47 @@
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Memulai
 
-### Prerequisites
-- Flutter SDK (Latest Stable)
-- Firebase Account
-- Cloudinary Account (for file uploads)
+### Prasyarat
+- Flutter SDK (Versi Stabil Terbaru)
+- Akun Firebase
+- Akun Cloudinary (untuk upload file)
 
-### Installation
+### Instalasi
 
-1. **Clone the Repository**
+1. **Clone Repositori**
    ```bash
    git clone https://github.com/masdafa/projectuasmonitormahasiswa.git
    cd projectuasmonitormahasiswa
    ```
 
-2. **Install Dependencies**
+2. **Instal Dependensi**
    ```bash
    flutter pub get
    ```
 
-3. **Configure Firebase**
-   - Place your `firebase_options.dart` or setup using [FlutterFire CLI](https://firebase.google.com/docs/flutter/setup).
+3. **Konfigurasi Firebase**
+   - Letakkan file `firebase_options.dart` atau atur menggunakan [FlutterFire CLI](https://firebase.google.com/docs/flutter/setup).
 
-4. **Run the Application**
+4. **Jalankan Aplikasi**
    ```bash
    flutter run -d chrome
    ```
 
 ---
 
-## 📸 Screenshots
+## 📸 Pandangan Aplikasi
 
 > [!TIP]
-> **Prognosis**: The app uses a dark/light responsive Indigo theme that adjusts to your professional environment.
-
-*(Screenshots can be added here once hosted)*
+> **Prognosis**: Aplikasi menggunakan tema Indigo yang responsif (terang/gelap) yang menyesuaikan dengan lingkungan profesional Anda.
 
 ---
 
-## 📄 License
+## 📄 Lisensi
 
-This project is part of a Final Project (UAS) requirement. Distributed under the MIT License. See `LICENSE` for more information.
+Proyek ini adalah bagian dari pemenuhan Tugas Akhir Semester (UAS). Didistribusikan di bawah Lisensi MIT. Lihat `LICENSE` untuk informasi lebih lanjut.
 
 ---
 
-Developed with ❤️ for **Universitas Bina Bangsa**
+Dikembangkan dengan ❤️ oleh **Kelompok 1 - Universitas Bina Bangsa**
