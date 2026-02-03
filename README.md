@@ -11,6 +11,15 @@
 
 ## Tampilan Aplikasi
 
+![image](https://github.com/ZwetaTriRahma/Project-TA-Monitor/blob/865a181fd26745b081d152096d9323683438ffd6/screenshot1.png)
+![image](https://github.com/ZwetaTriRahma/Project-TA-Monitor/blob/865a181fd26745b081d152096d9323683438ffd6/screenshot2.png)
+![image](https://github.com/ZwetaTriRahma/Project-TA-Monitor/blob/865a181fd26745b081d152096d9323683438ffd6/screenshot3.png)
+![image](https://github.com/ZwetaTriRahma/Project-TA-Monitor/blob/865a181fd26745b081d152096d9323683438ffd6/screenshot4.png)
+![image](https://github.com/ZwetaTriRahma/Project-TA-Monitor/blob/865a181fd26745b081d152096d9323683438ffd6/screenshot5.png)
+![image](https://github.com/ZwetaTriRahma/Project-TA-Monitor/blob/865a181fd26745b081d152096d9323683438ffd6/screenshot6.png)
+![image](https://github.com/ZwetaTriRahma/Project-TA-Monitor/blob/865a181fd26745b081d152096d9323683438ffd6/screenshot7.png)
+
+  
 ## ✨ Fitur Utama
 
 ### 👨‍🎓 Untuk Mahasiswa
