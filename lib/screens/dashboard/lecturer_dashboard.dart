@@ -188,7 +188,7 @@ class _StudentListState extends State<_StudentList> {
             decoration: InputDecoration(
               hintText: 'Search for a student...',
               prefixIcon: const Icon(Icons.search),
-              fillColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
             ),
           ),
         ),
@@ -265,7 +265,7 @@ class _CalendarAndTasksSectionState extends State<_CalendarAndTasksSection> {
         .get();
 
     if (studentDocs.docs.isEmpty) {
-      yield {'events': LinkedHashMap<DateTime, List<String>>(), 'tasks': <Map<String, dynamic>>[]};
+      yield {'events': <DateTime, List<String>>{}, 'tasks': <Map<String, dynamic>>[]};
       return;
     }
 

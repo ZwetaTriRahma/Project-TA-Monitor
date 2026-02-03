@@ -49,8 +49,8 @@ class _ProfessionalScreenState extends State<ProfessionalScreen> {
 
   // Function to show a dialog for adding/editing a task
   void _showTaskDialog({Task? task}) {
-    final _titleController = TextEditingController(text: task?.title);
-    final _descriptionController = TextEditingController(text: task?.description);
+    final titleController = TextEditingController(text: task?.title);
+    final descriptionController = TextEditingController(text: task?.description);
 
     showDialog(
       context: context,
@@ -61,7 +61,7 @@ class _ProfessionalScreenState extends State<ProfessionalScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: _titleController,
+                controller: titleController,
                 decoration: const InputDecoration(
                   labelText: 'Title',
                   border: OutlineInputBorder(),
@@ -69,7 +69,7 @@ class _ProfessionalScreenState extends State<ProfessionalScreen> {
               ),
               const SizedBox(height: 16),
               TextField(
-                controller: _descriptionController,
+                controller: descriptionController,
                 decoration: const InputDecoration(
                   labelText: 'Description',
                   border: OutlineInputBorder(),
@@ -85,8 +85,8 @@ class _ProfessionalScreenState extends State<ProfessionalScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                final title = _titleController.text.trim();
-                final description = _descriptionController.text.trim();
+                final title = titleController.text.trim();
+                final description = descriptionController.text.trim();
 
                 if (title.isNotEmpty) {
                   if (task == null) {
@@ -243,8 +243,8 @@ class _ProfessionalScreenState extends State<ProfessionalScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showTaskDialog(),
         tooltip: 'Add Task',
-        child: const Icon(Icons.add),
         backgroundColor: Colors.blue.shade700,
+        child: const Icon(Icons.add),
       ),
     );
   }

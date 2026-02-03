@@ -7,7 +7,7 @@ import 'package:ta_monitor/screens/chat/chat_screen.dart';
 import 'package:ta_monitor/models/user_model.dart'; 
 
 class ChatListScreen extends StatefulWidget {
-  const ChatListScreen({Key? key}) : super(key: key);
+  const ChatListScreen({super.key});
 
   @override
   _ChatListScreenState createState() => _ChatListScreenState();

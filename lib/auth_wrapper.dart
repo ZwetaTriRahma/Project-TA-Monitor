@@ -51,9 +51,9 @@ class RoleBasedRedirect extends StatelessWidget {
             final role = data['role'];
 
             if (role == 'Mahasiswa') {
-              return StudentDashboard();
+              return const StudentDashboard();
             } else if (role == 'Dosen') {
-              return LecturerDashboard();
+              return const LecturerDashboard();
             }
           }
           // JIKA DATA USER TIDAK DITEMUKAN ATAU TIDAK PUNYA PERAN

@@ -86,7 +86,7 @@ class MyApp extends StatelessWidget {
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Colors.white10),
+                  side: const BorderSide(color: Colors.white10),
                 ),
                 clipBehavior: Clip.antiAlias,
               ),

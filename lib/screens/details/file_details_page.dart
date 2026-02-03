@@ -143,8 +143,8 @@ class _FileInfoSectionState extends State<_FileInfoSection> {
       final pickedFile = result.files.single;
 
       // Cloudinary upload logic
-      final String cloudinaryCloudName = 'dl7kvbaao';
-      final String cloudinaryApiKey = '526219655212682';
+      const String cloudinaryCloudName = 'dl7kvbaao';
+      const String cloudinaryApiKey = '526219655212682';
       final url = Uri.parse('https://api.cloudinary.com/v1_1/$cloudinaryCloudName/raw/upload');
       final request = http.MultipartRequest('POST', url)
         ..fields['api_key'] = cloudinaryApiKey
@@ -210,7 +210,7 @@ class _FileInfoSectionState extends State<_FileInfoSection> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Card(
-            color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+            color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
             margin: EdgeInsets.zero,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -544,7 +544,7 @@ class _CommentsList extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: isMe ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceVariant,
+                        color: isMe ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(16).copyWith(
                           topLeft: !isMe ? const Radius.circular(0) : null,
                           topRight: isMe ? const Radius.circular(0) : null,

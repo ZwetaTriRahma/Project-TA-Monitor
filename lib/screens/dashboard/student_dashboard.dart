@@ -33,10 +33,8 @@ class _StudentDashboardState extends State<StudentDashboard> {
   void initState() {
     super.initState();
     _currentUser = FirebaseAuth.instance.currentUser!;
-    _userDataFuture =
-        FirebaseFirestore.instance.collection('users').doc(_currentUser.uid).get();
+    _userDataFuture = FirebaseFirestore.instance.collection('users').doc(_currentUser.uid).get();
     _searchController.addListener(() => setState(() => _searchQuery = _searchController.text));
-    
     // Inisialisasi Notifikasi
     FirebaseApi().initNotifications();
   }
@@ -46,8 +44,6 @@ class _StudentDashboardState extends State<StudentDashboard> {
     _searchController.dispose();
     super.dispose();
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +70,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
                     decoration: InputDecoration(
                       hintText: 'Search for a file...',
                       prefixIcon: const Icon(Icons.search),
-                      fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                      fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -129,12 +125,11 @@ class _StudentDashboardState extends State<StudentDashboard> {
         builder: (context, snapshot) {
           final data = snapshot.data?.data();
           final progress = (data?['progress'] as num? ?? 0).toDouble(); // e.g. 0.65 for 65%
-
           return Column(
             children: [
               Row(
                 children: [
-                   CircularProgressIndicator(
+                  CircularProgressIndicator(
                     value: progress,
                     strokeWidth: 8,
                     backgroundColor: Colors.white24,
@@ -234,6 +229,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
 
 class _SubmissionsList extends StatelessWidget {
   const _SubmissionsList({required this.currentUser, required this.searchQuery});
+
   final User currentUser;
   final String searchQuery;
 
@@ -270,10 +266,8 @@ class _SubmissionsList extends StatelessWidget {
   }
 }
 
-
 class _CalendarSection extends StatefulWidget {
   final String userId;
-
   const _CalendarSection({required this.userId});
 
   @override
@@ -304,13 +298,16 @@ class _CalendarSectionState extends State<_CalendarSection> {
         equals: isSameDay,
         hashCode: (key) => key.day * 1000000 + key.month * 10000 + key.year,
       );
+
       for (final doc in snapshot.docs) {
         final data = doc.data();
         final deadline = (data['revisionDeadline'] as Timestamp?)?.toDate();
         final fileName = data['fileName'] as String? ?? 'file';
+
         if (deadline != null) {
           final date = DateTime.utc(deadline.year, deadline.month, deadline.day);
           final eventString = "Deadline for: '$fileName'";
+
           if (events.containsKey(date)) {
             events[date]!.add(eventString);
           } else {
@@ -318,12 +315,9 @@ class _CalendarSectionState extends State<_CalendarSection> {
           }
         }
       }
+
       yield events;
     }
-  }
-
-  List<String> _getEventsForDay(DateTime day, LinkedHashMap<DateTime, List<String>> events) {
-    return events[day] ?? [];
   }
 
   @override
@@ -338,7 +332,10 @@ class _CalendarSectionState extends State<_CalendarSection> {
           return Center(child: Text("Error: ${snapshot.error}"));
         }
 
-        final events = snapshot.data ?? LinkedHashMap();
+        final events = snapshot.data ?? LinkedHashMap<DateTime, List<String>>(
+          equals: isSameDay,
+          hashCode: (key) => key.day * 1000000 + key.month * 10000 + key.year,
+        );
 
         return Card(
           margin: const EdgeInsets.all(12.0),
@@ -351,7 +348,7 @@ class _CalendarSectionState extends State<_CalendarSection> {
               lastDay: DateTime.utc(2030, 12, 31),
               focusedDay: _focusedDay,
               selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-              eventLoader: (day) => _getEventsForDay(day, events),
+              eventLoader: (day) => events[day] ?? [],
               onDaySelected: (selected, focused) {
                 if (!isSameDay(_selectedDay, selected)) {
                   setState(() {
@@ -361,7 +358,7 @@ class _CalendarSectionState extends State<_CalendarSection> {
                 }
               },
               onPageChanged: (focused) {
-                  _focusedDay = focused;
+                _focusedDay = focused;
               },
               calendarStyle: CalendarStyle(
                 todayDecoration: BoxDecoration(
@@ -388,7 +385,6 @@ class _CalendarSectionState extends State<_CalendarSection> {
     );
   }
 }
-
 
 class _DashboardAppBar extends StatelessWidget implements PreferredSizeWidget {
   const _DashboardAppBar({required this.userDataFuture, required this.currentUser});
@@ -481,7 +477,6 @@ class _UploadButtonState extends State<_UploadButton> {
 
   Future<void> _uploadFile() async {
     setState(() => _isUploading = true);
-
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
@@ -492,10 +487,9 @@ class _UploadButtonState extends State<_UploadButton> {
         if (mounted) setState(() => _isUploading = false);
         return;
       }
-      final pickedFile = result.files.single;
 
+      final pickedFile = result.files.single;
       final url = Uri.parse('https://api.cloudinary.com/v1_1/$_cloudinaryCloudName/raw/upload');
-      
       final request = http.MultipartRequest('POST', url)
         ..fields['api_key'] = _cloudinaryApiKey
         ..fields['upload_preset'] = 'default';
@@ -514,10 +508,13 @@ class _UploadButtonState extends State<_UploadButton> {
         final responseData = await response.stream.toBytes();
         final responseString = String.fromCharCodes(responseData);
         final jsonMap = jsonDecode(responseString);
+
         debugPrint('Response JSON: $jsonMap');
+
         if (jsonMap.containsKey('error')) {
           throw Exception('Cloudinary error: ${jsonMap['error']['message']}');
         }
+
         final downloadUrl = jsonMap['secure_url'];
         debugPrint('Download URL: $downloadUrl');
 
@@ -526,10 +523,10 @@ class _UploadButtonState extends State<_UploadButton> {
           'fileName': pickedFile.name,
           'downloadUrl': downloadUrl,
           'uploadedAt': Timestamp.now(),
-          'status': 'Pending', 
+          'status': 'Pending',
           'title': pickedFile.name,
         });
-        
+
         final userData = await widget.userDataFuture;
         final studentName = userData.data()?['fullName'] as String? ?? 'A student';
         final lecturerId = userData.data()?['lecturerId'] as String?;
@@ -553,7 +550,6 @@ class _UploadButtonState extends State<_UploadButton> {
             const SnackBar(content: Text('File uploaded successfully'), backgroundColor: Colors.green),
           );
         }
-
       } else {
         final responseData = await response.stream.toBytes();
         final responseString = String.fromCharCodes(responseData);
@@ -562,11 +558,9 @@ class _UploadButtonState extends State<_UploadButton> {
         final errorMessage = jsonMap['error']?['message'] ?? 'Unknown error';
         throw Exception('Failed to upload to Cloudinary: $errorMessage');
       }
-
     } catch (e, s) {
       debugPrint("Error uploading file: $e");
       debugPrint(s.toString());
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Upload failed: $e'), backgroundColor: Colors.red),
@@ -605,8 +599,7 @@ class _EmptyStateView extends StatelessWidget {
           Icon(Icons.cloud_off, size: 80, color: Colors.grey),
           SizedBox(height: 16),
           Text('No files uploaded yet', style: TextStyle(fontSize: 18, color: Colors.grey)),
-          Text('Press the upload button to add your first file',
-              style: TextStyle(color: Colors.grey)),
+          Text('Press the upload button to add your first file', style: TextStyle(color: Colors.grey)),
         ],
       ),
     );
@@ -620,38 +613,42 @@ class _FileCard extends StatelessWidget {
   const _FileCard({required this.fileDoc});
 
   Future<void> _showDeleteConfirmationDialog(BuildContext context, String? downloadUrl) async {
-    return showDialog<void>(
+    return showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Confirm Deletion'),
-          content: const Text(
-              'Are you sure you want to delete the record of this file?'),
-          actions: <Widget>[
+          content: const Text('Are you sure you want to delete the record of this file?'),
+          actions: [
             TextButton(
               child: const Text('Cancel'),
               onPressed: () => Navigator.of(dialogContext).pop(),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red, foregroundColor: Colors.white),
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
               child: const Text('Delete'),
               onPressed: () async {
                 Navigator.of(dialogContext).pop();
                 try {
                   await fileDoc.reference.delete();
-
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                          content: Text('File record deleted successfully'), backgroundColor: Colors.green),
+                        content: Text('File record deleted successfully'),
+                        backgroundColor: Colors.green,
+                      ),
                     );
                   }
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                          content: Text('Failed to delete file record: $e'), backgroundColor: Colors.red),
+                        content: Text('Failed to delete file record: $e'),
+                        backgroundColor: Colors.red,
+                      ),
                     );
                   }
                 }
@@ -679,7 +676,7 @@ class _FileCard extends StatelessWidget {
         textColor = Colors.orange.shade800;
         icon = Icons.edit;
         break;
-      default: 
+      default:
         backgroundColor = Colors.blue.shade100;
         textColor = Colors.blue.shade800;
         icon = Icons.hourglass_top;
@@ -711,8 +708,9 @@ class _FileCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        onTap: () => Navigator.of(context)
-            .push(MaterialPageRoute(builder: (context) => FileDetailsPage(fileId: fileDoc.id))),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => FileDetailsPage(fileId: fileDoc.id)),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(

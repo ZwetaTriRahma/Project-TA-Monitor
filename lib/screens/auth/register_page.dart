@@ -178,9 +178,9 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: DecoratedBox(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
-            image: const AssetImage("assets/images/campus_background.png"),
+            image: AssetImage("assets/images/campus_background.png"),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(Color.fromRGBO(0, 0, 0, 0.6), BlendMode.darken),
           ),

@@ -29,9 +29,10 @@ class DefaultFirebaseOptions {
   // --- KONFIGURASI WEB ANDA YANG SUDAH BENAR ---
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: "AIzaSyBUXkTRUhJT5heLAmdybesfEPBlsuys9AI",
-    authDomain: "device-streaming-1d7576c5.firebaseapp.com",
-    projectId: "device-streaming-1d7576c5",
-    storageBucket: "device-streaming-1d7576c5.appspot.com", // Menggunakan .appspot.com yang lebih umum
+    authDomain: "ta-monitor-mahasiswa.firebaseapp.com",
+    projectId: "ta-monitor-mahasiswa",
+    storageBucket:
+        "device-streaming-1d7576c5.appspot.com", // Menggunakan .appspot.com yang lebih umum
     messagingSenderId: "288451811584",
     appId: "1:288451811584:web:8e4f1f176c09ad6d86bbe5",
   );

@@ -58,13 +58,17 @@ class _SchedulingPageState extends State<SchedulingPage> {
         'isRead': false,
       });
 
-      if(mounted) ScaffoldMessenger.of(context).showSnackBar(
+      if(mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Defense scheduled for $studentName'), backgroundColor: Colors.green),
       );
+      }
     } catch (e) {
-      if(mounted) ScaffoldMessenger.of(context).showSnackBar(
+      if(mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to schedule: $e'), backgroundColor: Colors.red),
       );
+      }
     }
   }
 

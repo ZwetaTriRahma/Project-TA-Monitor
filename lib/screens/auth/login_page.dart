@@ -178,7 +178,7 @@ class _LoginPageState extends State<LoginPage> {
               image: DecorationImage(image: AssetImage("assets/images/campus_background.png"), fit: BoxFit.cover),
             ),
           ),
-          Container(color: Color.fromRGBO(0, 0, 0, 0.5)),
+          Container(color: const Color.fromRGBO(0, 0, 0, 0.5)),
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -252,9 +252,9 @@ class _LoginForm extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(24.0),
               decoration: BoxDecoration(
-                color: Color.fromRGBO(255, 255, 255, 0.1),
+                color: const Color.fromRGBO(255, 255, 255, 0.1),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Color.fromRGBO(255, 255, 255, 0.2)),
+                border: Border.all(color: const Color.fromRGBO(255, 255, 255, 0.2)),
               ),
               child: Form(
                 key: formKey,
