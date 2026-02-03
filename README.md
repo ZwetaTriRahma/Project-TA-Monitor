@@ -1,3 +1,4 @@
+#Group Project 
 # TA-Monitor - Thesis Monitoring Platform 🎓
 
 [![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
