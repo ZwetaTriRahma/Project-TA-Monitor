@@ -9,6 +9,8 @@
 
 ---
 
+## Tampilan Aplikasi
+
 ## ✨ Fitur Utama
 
 ### 👨‍🎓 Untuk Mahasiswa
@@ -83,4 +85,4 @@ Proyek ini adalah bagian dari pemenuhan Tugas Akhir Semester (UAS). Didistribusi
 
 ---
 
-Dikembangkan dengan ❤️ oleh **Kelompok 1 - Universitas Bina Bangsa**
+Dikembangkan dengan ❤️ oleh **Kelompok 1 - Universitas Bina Bangsa*
